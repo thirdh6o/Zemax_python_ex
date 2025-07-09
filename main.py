@@ -1,33 +1,27 @@
-import clr, os, winreg, tempfile
+import clr, os, winreg
 import matplotlib.pyplot as plt
 import numpy as np
 import csv
 from datetime import datetime
 
+#注：手动停止之后一定要进行一次ZEMAX重启，否则无法打开追迹工具
+
 # 变量设置区域
-
-# 步长
-STEP_SIZE = 0.001
-
-
+##################################################################################
+##################################################################################
+# 7.9更新，修改为同时修改两个坐标，然后进行一次追迹，最后获取一次数据
+# 2号物体步长
+STEP_SIZE_OBJECT2 = 0.01
+# 3号物体步长
+STEP_SIZE_OBJECT3 = 0.01
 
 #总次数，计算方法为区间长度除以步长,可选择加一，因为比如0-100，步长为1，要想形成左闭右闭区间，要加一
-TOTAL_RUNS = 381
+TOTAL_RUNS = 100
 
 
-
-
-###############################################################################
-# 自动计算保留小数位数
-def get_decimal_places(step):
-    """根据步长自动计算需要保留的小数位数"""
-    str_step = str(step)
-    if '.' in str_step:
-        return len(str_step.split('.')[1]) + 1
-    return 1
-
-NUMBER_COUNT = get_decimal_places(STEP_SIZE)
-
+##################################################################################
+##################################################################################
+##################################################################################
 
 
 
@@ -73,20 +67,20 @@ def initialize_connection():
 
 # 以下是修改坐标的函数
 
-def set_which_XPosition(TheSystem,xnum,position):
+def set_which_XPosition(TheSystem,xnum,step):
     nce = TheSystem.NCE
-    nce.GetObjectAt(xnum).XPosition = position
+    nce.GetObjectAt(xnum).XPosition += step
 
 
 
-def set_which_YPosition(TheSystem,ynum,position):
+def set_which_YPosition(TheSystem,ynum,step):
     nce = TheSystem.NCE
-    nce.GetObjectAt(ynum).YPosition = position
+    nce.GetObjectAt(ynum).YPosition += step
 
 
-def set_which_ZPosition(TheSystem,znum,position):
+def set_which_ZPosition(TheSystem,znum,step):
     nce = TheSystem.NCE
-    nce.GetObjectAt(znum).ZPosition = position
+    nce.GetObjectAt(znum).ZPosition += step
 
 ##############################################################
 
@@ -137,10 +131,9 @@ def run_nsc_ray_trace(TheSystem):
 
 
 ########
-#已修改，变为两个参数
+# 已修改，变为两个参数
 #  def get_detector_total_power(TheSystem, ZOSAPI, number, csv_writer, position1,position2):
-
-#数值为外部传参，里面只需要修改写入逻辑即可,为下面两句
+# 数值为外部传参，里面只需要修改写入逻辑即可,为下面两句
 #  csv_writer.writerow([position1, position2, power_value])
 #  csv_writer.writerow([position1, position2 ,0.0])  # 如果没有找到，记录0
 
@@ -192,17 +185,26 @@ def main():
             csv_writer = csv.writer(csv_file)
             
             # 如果是第一次循环，写入表头
+
+            #表头修改
             if i == 0:
-                csv_writer.writerow(['Position', 'Total Power'])
+                csv_writer.writerow(['Obj2Position','Obj3Position', 'Total Power'])
             
         
-            
+            ##7.9更新主函数，流程为同时修改两次坐标，然后进行一次追迹，最后获取一次数据
             TheSystem, ZOSAPI = initialize_connection()
-            position = round(i*STEP_SIZE+START_POSITION+FAULT_MIX, NUMBER_COUNT)
-            print(f"当前是第{i+1}次迭代，位置值为：{position}")
+            xposition2=get_which_XPosition(TheSystem,2)
+            xposition3=get_which_XPosition(TheSystem,3)
+            print(f"Round:{i+1}||Object2_X:{xposition2}||Object3_X:{xposition3}")
             run_nsc_ray_trace(TheSystem)
-            get_detector_total_power(TheSystem, ZOSAPI, i, csv_writer, position)
+            get_detector_total_power(TheSystem, ZOSAPI, i, csv_writer,xposition2, xposition3)
+            set_which_XPosition(TheSystem,2,STEP_SIZE_OBJECT2)
+            set_which_XPosition(TheSystem,3,STEP_SIZE_OBJECT3)
+            ##################################################################
 
+
+# TODO
+# 1. 画图部分模块封装
            
 if __name__ == "__main__":
     main()
