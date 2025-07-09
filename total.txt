@@ -1,0 +1,81 @@
+当前是第1次迭代，位置值为：5.7
+=== Detector Viewer Text Output ===
+Total Power     : 1.0000E-02 Watts
+当前是第2次迭代，位置值为：5.705
+=== Detector Viewer Text Output ===
+Total Power     : 6.0000E-02 Watts
+当前是第3次迭代，位置值为：5.71
+=== Detector Viewer Text Output ===
+Total Power     : 5.0000E-02 Watts
+当前是第4次迭代，位置值为：5.715
+=== Detector Viewer Text Output ===
+Total Power     : 6.0000E-02 Watts
+当前是第5次迭代，位置值为：5.720000000000001
+=== Detector Viewer Text Output ===
+Total Power     : 6.0000E-02 Watts
+当前是第6次迭代，位置值为：5.7250000000000005
+=== Detector Viewer Text Output ===
+Total Power     : 6.0000E-02 Watts
+当前是第7次迭代，位置值为：5.73
+=== Detector Viewer Text Output ===
+Total Power     : 3.0000E-02 Watts
+当前是第8次迭代，位置值为：5.735
+=== Detector Viewer Text Output ===
+Total Power     : 5.0000E-02 Watts
+当前是第9次迭代，位置值为：5.74
+=== Detector Viewer Text Output ===
+Total Power     : 8.0000E-02 Watts
+当前是第10次迭代，位置值为：5.745
+=== Detector Viewer Text Output ===
+Total Power     : 5.0000E-02 Watts
+当前是第11次迭代，位置值为：5.75
+=== Detector Viewer Text Output ===
+Total Power     : 7.0000E-02 Watts
+当前是第12次迭代，位置值为：5.755
+=== Detector Viewer Text Output ===
+Total Power     : 8.0000E-02 Watts
+当前是第13次迭代，位置值为：5.760000000000001
+=== Detector Viewer Text Output ===
+Total Power     : 3.0000E-02 Watts
+当前是第14次迭代，位置值为：5.765000000000001
+=== Detector Viewer Text Output ===
+Total Power     : 8.0000E-02 Watts
+当前是第15次迭代，位置值为：5.7700000000000005
+=== Detector Viewer Text Output ===
+Total Power     : 6.0000E-02 Watts
+当前是第16次迭代，位置值为：5.775
+=== Detector Viewer Text Output ===
+Total Power     : 1.4000E-01 Watts
+当前是第17次迭代，位置值为：5.78
+=== Detector Viewer Text Output ===
+Total Power     : 7.0000E-02 Watts
+当前是第18次迭代，位置值为：5.785
+=== Detector Viewer Text Output ===
+Total Power     : 1.1000E-01 Watts
+当前是第19次迭代，位置值为：5.79
+=== Detector Viewer Text Output ===
+Total Power     : 5.0000E-02 Watts
+当前是第20次迭代，位置值为：5.795
+=== Detector Viewer Text Output ===
+Total Power     : 5.0000E-02 Watts
+当前是第21次迭代，位置值为：5.800000000000001
+=== Detector Viewer Text Output ===
+Total Power     : 7.0000E-02 Watts
+当前是第22次迭代，位置值为：5.805000000000001
+=== Detector Viewer Text Output ===
+Total Power     : 5.0000E-02 Watts
+当前是第23次迭代，位置值为：5.8100000000000005
+=== Detector Viewer Text Output ===
+Total Power     : 1.1000E-01 Watts
+当前是第24次迭代，位置值为：5.815
+=== Detector Viewer Text Output ===
+Total Power     : 6.0000E-02 Watts
+当前是第25次迭代，位置值为：5.82
+=== Detector Viewer Text Output ===
+Total Power     : 1.0000E-01 Watts
+当前是第26次迭代，位置值为：5.825
+=== Detector Viewer Text Output ===
+Total Power     : 6.0000E-02 Watts
+当前是第27次迭代，位置值为：5.83
+=== Detector Viewer Text Output ===
+Total Power     : 6.0000E-02 Watts
