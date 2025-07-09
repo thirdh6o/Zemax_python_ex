@@ -64,9 +64,9 @@ def initialize_connection():
 #     nce.GetObjectAt(8).YPosition += STEP_SIZE
 ##############################################
 
-
+##################################################
 # 以下是修改坐标的函数
-
+#################################################
 def set_which_XPosition(TheSystem,xnum,step):
     nce = TheSystem.NCE
     nce.GetObjectAt(xnum).XPosition += step
