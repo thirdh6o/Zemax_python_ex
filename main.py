@@ -66,19 +66,45 @@ def set_wolter_z_position(TheSystem, ZOSAPI):
 
 
 
-def set_object_position_version79(TheSystem,ZOSAPI):
+# 以下是修改坐标的函数
+
+def set_which_XPosition(TheSystem,xnum,position):
     nce = TheSystem.NCE
-    nce.GetObjectAt(8).YPosition += STEP_SIZE
+    nce.GetObjectAt(xnum).XPosition = position
 
 
 
+def set_which_YPosition(TheSystem,ynum,position):
+    nce = TheSystem.NCE
+    nce.GetObjectAt(ynum).YPosition = position
+
+
+def set_which_ZPosition(TheSystem,znum,position):
+    nce = TheSystem.NCE
+    nce.GetObjectAt(znum).ZPosition = position
+
+##############################################################
+
+# 以下是获取坐标的函数
+def get_which_XPosition(TheSystem,xnum):
+    nce = TheSystem.NCE
+    return nce.GetObjectAt(xnum).XPosition
+
+
+def get_which_YPosition(TheSystem,ynum):
+    nce = TheSystem.NCE
+    return nce.GetObjectAt(ynum).YPosition
 
 
 
+def get_which_ZPosition(TheSystem,znum):
+    nce = TheSystem.NCE
+    return nce.GetObjectAt(znum).ZPosition
 
 
-
-
+##############################################################
+##############################################################
+##############################################################
 def run_nsc_ray_trace(TheSystem):
     """执行NSC光线追迹并获取探测器数据"""
     # === 1. 执行 NSC 光线追迹（这里不执行追迹，只是打开工具） ===
