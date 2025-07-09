@@ -9,20 +9,24 @@ from datetime import datetime
 # 步长
 STEP_SIZE = 0.001
 
-# 初始位置
-START_POSITION = -0.18
 
 
 #总次数，计算方法为区间长度除以步长,可选择加一，因为比如0-100，步长为1，要想形成左闭右闭区间，要加一
 TOTAL_RUNS = 381
 
 
-# 崩溃修复，用于断后重算 计算方法为上一次位置值减去 START_POSITION ，zemax里面的值就填写上一个表中最后的数值。  请每次新跑后归零
-FAULT_MIX=0
 
 
-#保留小数的位数，请设置为步长小数点后的位数加一位，例如0.001，小数点后有三位，这个值就设置为4
-NUMBER_COUNT=4
+###############################################################################
+# 自动计算保留小数位数
+def get_decimal_places(step):
+    """根据步长自动计算需要保留的小数位数"""
+    str_step = str(step)
+    if '.' in str_step:
+        return len(str_step.split('.')[1]) + 1
+    return 1
+
+NUMBER_COUNT = get_decimal_places(STEP_SIZE)
 
 
 
@@ -59,11 +63,12 @@ def initialize_connection():
 
 
 
-
-def set_wolter_z_position(TheSystem, ZOSAPI):
-    nce = TheSystem.NCE
-    nce.GetObjectAt(8).YPosition += STEP_SIZE
-
+#已弃用
+##############################################
+# def set_wolter_z_position(TheSystem, ZOSAPI):
+#     nce = TheSystem.NCE
+#     nce.GetObjectAt(8).YPosition += STEP_SIZE
+##############################################
 
 
 # 以下是修改坐标的函数
@@ -106,7 +111,6 @@ def get_which_ZPosition(TheSystem,znum):
 ##############################################################
 ##############################################################
 def run_nsc_ray_trace(TheSystem):
-    """执行NSC光线追迹并获取探测器数据"""
     # === 1. 执行 NSC 光线追迹（这里不执行追迹，只是打开工具） ===
     try:
         NSCRayTrace = TheSystem.Tools.OpenNSCRayTrace()
@@ -129,7 +133,18 @@ def run_nsc_ray_trace(TheSystem):
     except:
         raise Exception("无法打开 NSC 光线追迹工具")
 
-def get_detector_total_power(TheSystem, ZOSAPI, number, csv_writer, position):
+
+
+
+########
+#已修改，变为两个参数
+#  def get_detector_total_power(TheSystem, ZOSAPI, number, csv_writer, position1,position2):
+
+#数值为外部传参，里面只需要修改写入逻辑即可,为下面两句
+#  csv_writer.writerow([position1, position2, power_value])
+#  csv_writer.writerow([position1, position2 ,0.0])  # 如果没有找到，记录0
+
+def get_detector_total_power(TheSystem, ZOSAPI, number, csv_writer, position1,position2):
     """获取探测器的Total Power数据"""
     # === 2. 获取 Detector Viewer 中的 Total Power ===
     TheAnalysis = TheSystem.Analyses.New_Analysis(ZOSAPI.Analysis.AnalysisIDM.DetectorViewer)
@@ -155,12 +170,12 @@ def get_detector_total_power(TheSystem, ZOSAPI, number, csv_writer, position):
             power_str = line.split(':')[1].strip()
             power_value = float(power_str.split()[0])  # 只取数值部分，忽略'Watts'单位
             # 将位置和功率写入CSV
-            csv_writer.writerow([position, power_value])
+            csv_writer.writerow([position1, position2, power_value])
             found = True
 
     if not found:
         print("未找到 'Total Power' 字段")
-        csv_writer.writerow([position, 0.0])  # 如果没有找到，记录0
+        csv_writer.writerow([position1, position2 ,0.0])  # 如果没有找到，记录0
 
     TheAnalysis.Close()
 
@@ -187,7 +202,7 @@ def main():
             print(f"当前是第{i+1}次迭代，位置值为：{position}")
             run_nsc_ray_trace(TheSystem)
             get_detector_total_power(TheSystem, ZOSAPI, i, csv_writer, position)
-            set_wolter_z_position(TheSystem, ZOSAPI)
 
+           
 if __name__ == "__main__":
     main()
