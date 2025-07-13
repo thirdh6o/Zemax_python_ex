@@ -1,29 +1,27 @@
-import clr, os, winreg, tempfile
+import clr, os, winreg
 import matplotlib.pyplot as plt
 import numpy as np
 import csv
 from datetime import datetime
 
+#注：手动停止之后一定要进行一次ZEMAX重启，否则无法打开追迹工具
+
 # 变量设置区域
-
-# 步长
-STEP_SIZE = 0.001
-
-# 初始位置
-START_POSITION = -0.18
-
+##################################################################################
+##################################################################################
+# 7.9更新，修改为同时修改两个坐标，然后进行一次追迹，最后获取一次数据
+# 2号物体步长
+STEP_SIZE_OBJECT2 = 0.01
+# 3号物体步长
+STEP_SIZE_OBJECT3 = 0.01
 
 #总次数，计算方法为区间长度除以步长,可选择加一，因为比如0-100，步长为1，要想形成左闭右闭区间，要加一
-TOTAL_RUNS = 381
+TOTAL_RUNS = 100
 
 
-# 崩溃修复，用于断后重算 计算方法为上一次位置值减去 START_POSITION ，zemax里面的值就填写上一个表中最后的数值。  请每次新跑后归零
-FAULT_MIX=0
-
-
-#保留小数的位数，请设置为步长小数点后的位数加一位，例如0.001，小数点后有三位，这个值就设置为4
-NUMBER_COUNT=4
-
+##################################################################################
+##################################################################################
+##################################################################################
 
 
 
@@ -59,28 +57,54 @@ def initialize_connection():
 
 
 
+#已弃用
+##############################################
+# def set_wolter_z_position(TheSystem, ZOSAPI):
+#     nce = TheSystem.NCE
+#     nce.GetObjectAt(8).YPosition += STEP_SIZE
+##############################################
 
-def set_wolter_z_position(TheSystem, ZOSAPI):
+##################################################
+# 以下是修改坐标的函数
+#################################################
+def set_which_XPosition(TheSystem,xnum,step):
     nce = TheSystem.NCE
-    nce.GetObjectAt(8).YPosition += STEP_SIZE
+    nce.GetObjectAt(xnum).XPosition += step
 
 
 
-def set_object_position_version79(TheSystem,ZOSAPI):
+def set_which_YPosition(TheSystem,ynum,step):
     nce = TheSystem.NCE
-    nce.GetObjectAt(8).YPosition += STEP_SIZE
+    nce.GetObjectAt(ynum).YPosition += step
+
+
+def set_which_ZPosition(TheSystem,znum,step):
+    nce = TheSystem.NCE
+    nce.GetObjectAt(znum).ZPosition += step
+
+##############################################################
+
+# 以下是获取坐标的函数
+def get_which_XPosition(TheSystem,xnum):
+    nce = TheSystem.NCE
+    return nce.GetObjectAt(xnum).XPosition
+
+
+def get_which_YPosition(TheSystem,ynum):
+    nce = TheSystem.NCE
+    return nce.GetObjectAt(ynum).YPosition
 
 
 
+def get_which_ZPosition(TheSystem,znum):
+    nce = TheSystem.NCE
+    return nce.GetObjectAt(znum).ZPosition
 
 
-
-
-
-
-
+##############################################################
+##############################################################
+##############################################################
 def run_nsc_ray_trace(TheSystem):
-    """执行NSC光线追迹并获取探测器数据"""
     # === 1. 执行 NSC 光线追迹（这里不执行追迹，只是打开工具） ===
     try:
         NSCRayTrace = TheSystem.Tools.OpenNSCRayTrace()
@@ -103,7 +127,17 @@ def run_nsc_ray_trace(TheSystem):
     except:
         raise Exception("无法打开 NSC 光线追迹工具")
 
-def get_detector_total_power(TheSystem, ZOSAPI, number, csv_writer, position):
+
+
+
+########
+# 已修改，变为两个参数
+#  def get_detector_total_power(TheSystem, ZOSAPI, number, csv_writer, position1,position2):
+# 数值为外部传参，里面只需要修改写入逻辑即可,为下面两句
+#  csv_writer.writerow([position1, position2, power_value])
+#  csv_writer.writerow([position1, position2 ,0.0])  # 如果没有找到，记录0
+
+def get_detector_total_power(TheSystem, ZOSAPI, number, csv_writer, position1,position2):
     """获取探测器的Total Power数据"""
     # === 2. 获取 Detector Viewer 中的 Total Power ===
     TheAnalysis = TheSystem.Analyses.New_Analysis(ZOSAPI.Analysis.AnalysisIDM.DetectorViewer)
@@ -129,12 +163,12 @@ def get_detector_total_power(TheSystem, ZOSAPI, number, csv_writer, position):
             power_str = line.split(':')[1].strip()
             power_value = float(power_str.split()[0])  # 只取数值部分，忽略'Watts'单位
             # 将位置和功率写入CSV
-            csv_writer.writerow([position, power_value])
+            csv_writer.writerow([position1, position2, power_value])
             found = True
 
     if not found:
         print("未找到 'Total Power' 字段")
-        csv_writer.writerow([position, 0.0])  # 如果没有找到，记录0
+        csv_writer.writerow([position1, position2 ,0.0])  # 如果没有找到，记录0
 
     TheAnalysis.Close()
 
@@ -151,17 +185,35 @@ def main():
             csv_writer = csv.writer(csv_file)
             
             # 如果是第一次循环，写入表头
+
+            #表头修改
             if i == 0:
-                csv_writer.writerow(['Position', 'Total Power'])
+                csv_writer.writerow(['Obj2Position','Obj3Position', 'Total Power'])
             
         
-            
+            ##7.9更新主函数，流程为同时修改两次坐标，然后进行一次追迹，最后获取一次数据
             TheSystem, ZOSAPI = initialize_connection()
-            position = round(i*STEP_SIZE+START_POSITION+FAULT_MIX, NUMBER_COUNT)
-            print(f"当前是第{i+1}次迭代，位置值为：{position}")
+            xposition2=get_which_XPosition(TheSystem,2)
+            xposition3=get_which_XPosition(TheSystem,3)
+            print(f"Round:{i+1}||Object2_X:{xposition2}||Object3_X:{xposition3}")
             run_nsc_ray_trace(TheSystem)
-            get_detector_total_power(TheSystem, ZOSAPI, i, csv_writer, position)
-            set_wolter_z_position(TheSystem, ZOSAPI)
+            get_detector_total_power(TheSystem, ZOSAPI, i, csv_writer,xposition2, xposition3)
+            set_which_XPosition(TheSystem,2,STEP_SIZE_OBJECT2)
+            set_which_XPosition(TheSystem,3,STEP_SIZE_OBJECT3)
+            ##################################################################
 
+
+# TODO
+# 1. 画图部分模块封装
+           
+
+
+
+
+
+
+
+
+           
 if __name__ == "__main__":
     main()
