@@ -4,11 +4,16 @@ import os
 import time
 from tkinter import Tk, Button, StringVar, Label
 from tkinter.ttk import Combobox
+from datetime import datetime
+
+
+
+YPOSITION=0.0
 
 click_count = 0
 screenshot_count = 0
-csv_path = "measurements.csv"
-selected_channel = None  # 预先声明，但不在这里初始化 StringVar
+csv_path = None  # 初始化为None，在launch_gui时创建
+selected_channel = None  
 
 def connect_to_scope(target_resource=None):
     rm = pyvisa.ResourceManager()
@@ -36,7 +41,6 @@ def measure_once():
         # 强制开启通道显示
         scope.write(f":{channel}:DISPlay ON")
 
-
         # 执行测量
         scope.write(f":MEASure:ITEM VAMP,{channel}")
         vamp_resp = scope.query(f":MEASure:ITEM? VAMP,{channel}").strip()
@@ -54,14 +58,13 @@ def measure_once():
     except Exception as e:
         print(f"测量出错：{e}")
 
-
 def write_to_csv(count, vamp, area, channel):
-    header = ['点击次数', '通道', '幅度(VAMP)', '面积(MARea)']
+    global csv_path
+    header = ['点击次数', '通道', '幅度(VAMP)', '面积(MARea)', YPOSITION]
     row = [count, channel, vamp, area]
-    file_exists = os.path.isfile(csv_path)
     with open(csv_path, mode='a', newline='') as file:
         writer = csv.writer(file)
-        if not file_exists:
+        if count == 1:  # 第一次写入时添加表头
             writer.writerow(header)
         writer.writerow(row)
 
@@ -84,7 +87,11 @@ def capture_screenshot():
         print(f"截图出错：{e}")
 
 def launch_gui():
-    global selected_channel
+    global selected_channel, csv_path
+    
+    # 创建带有时间戳的CSV文件名
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    csv_path = f"measurements_{timestamp}.csv"
 
     window = Tk()
     window.title("示波器自动测量与截图")
