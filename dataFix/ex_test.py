@@ -15,6 +15,7 @@ FILENAME = "reality.csv"
 def read_csv_data(filepath):
     """
     读取 CSV 文件中的一组 y_k 和 r_k 数据
+    
     返回：y_vals, r_vals
     """
     with open(filepath, newline='') as csvfile:
